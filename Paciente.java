@@ -1,4 +1,3 @@
-package model;
 import java.util.Objects;
 
 public class Paciente implements Comparable<Paciente> {
