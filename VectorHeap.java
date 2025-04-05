@@ -1,123 +1,65 @@
-// Archivo: VectorHeap.java
-import java.util.Vector;
+import java.util.*;
 
-public class VectorHeap<E extends Comparable<E>> implements PriorityQueue<E> {
-    protected Vector<E> data; // Vector donde almacenaremos los elementos
-    
+/**
+@param <E> Tipo de dato que se va a guardar en el heap. Debe ser comparable.
+ */
+class VectorHeap<E extends Comparable<E>> {
+    private List<E> heap;
+
     public VectorHeap() {
-        data = new Vector<E>();
+        heap = new ArrayList<>();
     }
-    
-    // Retorna el índice del padre de un nodo
-    protected int parent(int i) {
-        return (i - 1) / 2;
+
+    /**
+    @param item Elemento que se quiere agregar.
+     */
+    public void insert(E item) {
+        heap.add(item);
+        siftUp(heap.size() - 1);
     }
-    
-    // Retorna el índice del hijo izquierdo de un nodo
-    protected int left(int i) {
-        return 2 * i + 1;
-    }
-    
-    // Retorna el índice del hijo derecho de un nodo
-    protected int right(int i) {
-        return 2 * i + 2;
-    }
-    
-    // Mueve un elemento hacia arriba hasta encontrar su posición correcta
-    protected void percolateUp(int leaf) {
-        int parent = parent(leaf);
-        E value = data.get(leaf);
-        
-        while (leaf > 0 && value.compareTo(data.get(parent)) < 0) {
-            data.set(leaf, data.get(parent));
-            leaf = parent;
-            parent = parent(leaf);
-        }
-        
-        data.set(leaf, value);
-    }
-    
-    // Mueve un elemento hacia abajo hasta encontrar su posición correcta
-    protected void pushDownRoot(int root) {
-        int heapSize = data.size();
-        E value = data.get(root);
-        
-        while (root < heapSize) {
-            int childpos = left(root);
-            
-            if (childpos >= heapSize) {
-                // No tiene hijos, termina
-                break;
-            }
-            
-            // Determina cuál es el hijo con mayor prioridad
-            if (right(root) < heapSize && 
-                data.get(childpos + 1).compareTo(data.get(childpos)) < 0) {
-                childpos++;
-            }
-            
-            // Si el valor tiene mayor prioridad que ambos hijos, termina
-            if (value.compareTo(data.get(childpos)) <= 0) {
-                break;
-            }
-            
-            // Mueve el hijo hacia arriba
-            data.set(root, data.get(childpos));
-            root = childpos;
-        }
-        
-        data.set(root, value);
-    }
-    
-    // Agrega un valor a la cola con prioridad
-    @Override
-    public void add(E value) {
-        data.add(value);
-        percolateUp(data.size() - 1);
-    }
-    
-    // Elimina y retorna el elemento con mayor prioridad
-    @Override
+
+    /**
+    @return El elemento con mayor prioridad o {@code null} si está vacío.
+     */
     public E remove() {
-        if (isEmpty()) {
-            return null;
-        }
-        
-        E minVal = data.get(0);
-        E lastVal = data.remove(data.size() - 1);
-        
-        if (!isEmpty()) {
-            data.set(0, lastVal);
-            pushDownRoot(0);
-        }
-        
-        return minVal;
+        if (heap.isEmpty()) return null;
+        E min = heap.get(0);
+        heap.set(0, heap.remove(heap.size() - 1));
+        siftDown(0);
+        return min;
     }
-    
-    // Retorna el elemento con mayor prioridad sin eliminarlo
-    @Override
-    public E getFirst() {
-        if (isEmpty()) {
-            return null;
-        }
-        return data.get(0);
-    }
-    
-    // Verifica si la cola está vacía
-    @Override
+
+    /**
+    @return {@code true} si no hay elementos, {@code false} en caso contrario.
+     */
     public boolean isEmpty() {
-        return data.size() == 0;
+        return heap.isEmpty();
     }
-    
-    // Retorna el tamaño de la cola
-    @Override
-    public int size() {
-        return data.size();
+
+    /**
+     @param index Posición del elemento que se va a mover hacia arriba.
+     */
+    private void siftUp(int index) {
+        while (index > 0) {
+            int parent = (index - 1) / 2;
+            if (heap.get(index).compareTo(heap.get(parent)) >= 0) break;
+            Collections.swap(heap, index, parent);
+            index = parent;
+        }
     }
-    
-    // Limpia la cola
-    @Override
-    public void clear() {
-        data.clear();
+
+    /**
+     @param index Posición del elemento que se va a mover hacia abajo.
+     */
+    private void siftDown(int index) {
+        int left, right, smallest;
+        while ((left = 2 * index + 1) < heap.size()) {
+            right = left + 1;
+            smallest = (right < heap.size() && heap.get(right).compareTo(heap.get(left)) < 0) ? right : left;
+            if (heap.get(index).compareTo(heap.get(smallest)) <= 0) break;
+            Collections.swap(heap, index, smallest);
+            index = smallest;
+        }
     }
 }
+
